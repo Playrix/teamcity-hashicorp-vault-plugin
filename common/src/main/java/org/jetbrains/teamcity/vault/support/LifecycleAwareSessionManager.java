@@ -35,6 +35,7 @@ import org.springframework.web.client.RestOperations;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -58,6 +59,8 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
     private volatile VaultToken token;
 
+    private volatile ScheduledFuture scheduled;
+
     public LifecycleAwareSessionManager(@NotNull ClientAuthentication clientAuthentication,
                                         @NotNull TaskScheduler taskScheduler,
                                         @NotNull RestOperations restOperations,
@@ -72,26 +75,11 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
     @Override
     public void destroy() {
-        VaultToken token = this.token;
-        this.token = null;
+        ScheduledFuture future = this.scheduled;
+        this.scheduled = null;
 
-        if (token instanceof LoginToken) {
-            revoke(token);
-        }
-    }
-
-    protected void revoke(VaultToken token) {
-        try {
-            restOperations.postForObject("auth/token/revoke-self",
-                    new HttpEntity<Object>(VaultHttpHeaders.from(token)), Map.class);
-        } catch (HttpStatusCodeException e) {
-            String message = "Cannot revoke HashiCorp Vault token: " + VaultResponses.getError(e.getResponseBodyAsString());
-            LOG.warn(message, e);
-            logger.warning(message);
-        } catch (RuntimeException e) {
-            String message = "Cannot revoke HashiCorp Vault token";
-            LOG.warn(message, e);
-            logger.warning(message + ": " + e.getMessage());
+        if ((future != null) && !(future.isCancelled() || future.isDone()) ) {
+            future.cancel(false);
         }
     }
 
@@ -205,7 +193,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
             };
             Date startTime = refreshTrigger.nextExecutionTime((LoginToken) token);
             LOG.info("Scheduling HashiCorp Vault token refresh to " + startTime);
-            taskScheduler.schedule(task, startTime);
+            this.scheduled = taskScheduler.schedule(task, startTime);
         }
     }
 

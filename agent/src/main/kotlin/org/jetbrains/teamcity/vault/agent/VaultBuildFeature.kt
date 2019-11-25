@@ -131,7 +131,11 @@ class VaultBuildFeature(dispatcher: EventDispatcher<AgentLifeCycleListener>,
     }
 
     override fun beforeBuildFinish(build: AgentRunningBuild, buildStatus: BuildFinishedStatus) {
-        // Discard token
+        val manager = sessions[build.buildId] ?: return
+        manager.destroy()
+    }
+
+    override fun buildFinished(build: AgentRunningBuild, buildStatus: BuildFinishedStatus) {
         sessions.remove(build.buildId)
     }
 }
