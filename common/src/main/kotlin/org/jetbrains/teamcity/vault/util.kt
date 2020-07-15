@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 JetBrains s.r.o.
+ * Copyright 2000-2020 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import jetbrains.buildServer.util.ssl.SSLTrustStoreProvider
 import org.jetbrains.teamcity.vault.support.ClientHttpRequestFactoryFactory
 import org.jetbrains.teamcity.vault.support.MappingJackson2HttpMessageConverter
 import org.jetbrains.teamcity.vault.support.RetryRestTemplate
+import org.jetbrains.teamcity.vault.support.VaultInterceptors
 import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.converter.ByteArrayHttpMessageConverter
@@ -71,7 +72,10 @@ fun createRetryRestTemplate(settings: VaultFeatureSettings, trustStoreProvider: 
 
     val retry = createRetryTemplate(settings.backoffPeriod, settings.maxAttempts)
     val template = createRetryRestTemplate(endpoint, factory)
+
     template.setRetryTemplate(retry)
+    VaultInterceptors.createNamespaceInterceptor(settings.vaultNamespace)?.let { template.interceptors.add(it) }
+
     return template
 }
 

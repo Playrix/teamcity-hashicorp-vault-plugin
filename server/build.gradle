@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 JetBrains s.r.o.
+ * Copyright 2000-2020 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 apply plugin: 'java'
-apply plugin: 'java'
+apply plugin: 'kotlin'
 
 apply plugin: 'com.github.rodm.teamcity-server'
 apply plugin: 'com.github.rodm.teamcity-environments'
@@ -34,7 +34,7 @@ dependencies {
 
     agent project(path: ':agent', configuration: 'plugin')
 
-    testCompile project(path: ':common', configuration: 'testOutput')
+    testImplementation(testFixtures(project(':common')))
 }
 
 teamcity {
@@ -47,7 +47,7 @@ teamcity {
             description = 'Provides support for HashiCorp Vault Secrets Manager'
             version = project.version
 
-            vendorName = 'JetBrains, s.r.o.'
+            vendorName = 'JetBrains'
             vendorUrl = 'https://www.jetbrains.com'
 
             useSeparateClassloader = true
@@ -69,6 +69,13 @@ teamcity {
 
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+    kotlinOptions { jvmTarget = '1.8' }
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+
 
 // Do not include version into plugin archive name
 project.tasks.getByName('serverPlugin').version = ''

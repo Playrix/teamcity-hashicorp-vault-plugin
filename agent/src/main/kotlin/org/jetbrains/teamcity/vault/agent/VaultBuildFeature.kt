@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 JetBrains s.r.o.
+ * Copyright 2000-2020 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ class VaultBuildFeature(dispatcher: EventDispatcher<AgentLifeCycleListener>,
         namespaces.forEach { namespace ->
             // namespace is either empty string or something like 'id'
             val url = parameters[getVaultParameterName(namespace, VaultConstants.URL_PROPERTY_SUFFIX)]
+            val vaultNamespace = parameters[getVaultParameterName(namespace, VaultConstants.VAULT_NAMESPACE_PROPERTY_SUFFIX)] ?: ""
             val wrapped = parameters[getVaultParameterName(namespace, VaultConstants.WRAPPED_TOKEN_PROPERTY_SUFFIX)]
             val maxAttempts = parameters[getVaultParameterName(namespace, VaultConstants.MAX_ATTEMPTS_PERIOD_PROPERTY_SUFFIX)]?.toIntOrNull() ?: VaultConstants.FeatureSettings.DEFAULT_MAX_ATTEMPTS
             val backoffPeriod = parameters[getVaultParameterName(namespace, VaultConstants.BACKOFF_PERIOD_PROPERTY_SUFFIX)]?.toLongOrNull() ?: VaultConstants.FeatureSettings.DEFAULT_BACKOFF_PERIOD
@@ -78,7 +79,7 @@ class VaultBuildFeature(dispatcher: EventDispatcher<AgentLifeCycleListener>,
             }
             val logger = runningBuild.buildLogger
             logger.activity("HashiCorp Vault" + if (isDefault(namespace)) "" else " ('$namespace' namespace)", VaultConstants.FeatureSettings.FEATURE_TYPE) {
-                val settings = VaultFeatureSettings(namespace, url, backoffPeriod, maxAttempts, failOnError)
+                val settings = VaultFeatureSettings(namespace, url, vaultNamespace, backoffPeriod, maxAttempts, failOnError)
 
                 if (wrapped == null || wrapped.isNullOrEmpty()) {
                     logger.internalError(VaultConstants.FeatureSettings.FEATURE_TYPE, "Wrapped HashiCorp Vault token for url $url not found", null)

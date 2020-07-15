@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 JetBrains s.r.o.
+ * Copyright 2000-2020 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ class VaultParametersResolver(private val trustStoreProvider: SSLTrustStoreProvi
     fun doFetchAndPrepareReplacements(settings: VaultFeatureSettings, token: String, parameters: List<VaultParameter>, logger: BuildProgressLogger): ResolvingResult {
         val endpoint = VaultEndpoint.from(URI.create(settings.url))
         val factory = createClientHttpRequestFactory(trustStoreProvider)
-        val client = VaultTemplate(endpoint, factory, SimpleSessionManager({ VaultToken.of(token) }))
+        val client = VaultTemplate(endpoint, settings.vaultNamespace, factory, SimpleSessionManager({ VaultToken.of(token) }))
 
         return doFetchAndPrepareReplacements(client, parameters, logger)
     }

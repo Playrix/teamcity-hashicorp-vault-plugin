@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 JetBrains s.r.o.
+ * Copyright 2000-2020 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import jetbrains.buildServer.util.ThreadUtil
 import org.testcontainers.containers.GenericContainer
 import java.util.*
 
-open class VaultDevContainer(override val token: String = UUID.randomUUID().toString(), val version: String = "0.11.2")
-    : GenericContainer<VaultDevContainer>("vault:$version"), VaultDevEnvironment {
+open class VaultDevContainer(override val token: String = UUID.randomUUID().toString(), val version: String = "1.4.1")
+    : GenericContainer<VaultDevContainer>("hashicorp/vault-enterprise:${version}_ent"), VaultDevEnvironment {
     init {
         withExposedPorts(8200)
         withEnv("VAULT_DEV_ROOT_TOKEN_ID", token)
@@ -33,4 +33,5 @@ open class VaultDevContainer(override val token: String = UUID.randomUUID().toSt
 
     override val url: String
         get() = "http://$containerIpAddress:$firstMappedPort"
+
 }

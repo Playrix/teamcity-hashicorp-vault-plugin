@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 JetBrains s.r.o.
+ * Copyright 2000-2020 JetBrains s.r.o.
  *
  * Licensed under  the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,17 @@
  */
 package org.jetbrains.teamcity.vault
 
-data class VaultFeatureSettings(val namespace: String, val url: String, val endpoint: String, val roleId: String, val secretId: String, val backoffPeriod: Long, val maxAttempts: Int, val failOnError: Boolean = true) {
+data class VaultFeatureSettings(val namespace: String, val url: String, val vaultNamespace: String, val endpoint: String, val roleId: String, val secretId: String, val backoffPeriod: Long, val maxAttempts: Int, val failOnError: Boolean = true) {
 
-    constructor(namespace: String, url: String, backoffPeriod: Long, maxAttempts: Int, failOnError: Boolean) : this(namespace, url, VaultConstants.FeatureSettings.DEFAULT_ENDPOINT_PATH, "", "", backoffPeriod, maxAttempts, failOnError)
+    constructor(namespace: String, url: String, vaultNamespace: String, backoffPeriod: Long, maxAttempts: Int, failOnError: Boolean) : this(namespace, url, vaultNamespace, VaultConstants.FeatureSettings.DEFAULT_ENDPOINT_PATH, "", "", backoffPeriod, maxAttempts, failOnError)
 
-    constructor(url: String, roleId: String, secretId: String, backoffPeriod: Long, maxAttempts: Int) : this(VaultConstants.FeatureSettings.DEFAULT_PARAMETER_NAMESPACE, url, VaultConstants.FeatureSettings.DEFAULT_ENDPOINT_PATH, roleId, secretId, backoffPeriod, maxAttempts)
+    constructor(url: String, vaultNamespace: String, roleId: String, secretId: String, backoffPeriod: Long, maxAttempts: Int) : this(VaultConstants.FeatureSettings.DEFAULT_PARAMETER_NAMESPACE, url, vaultNamespace, VaultConstants.FeatureSettings.DEFAULT_ENDPOINT_PATH, roleId, secretId, backoffPeriod, maxAttempts)
 
     constructor(map: Map<String, String>) : this(
             map[VaultConstants.FeatureSettings.NAMESPACE] ?: VaultConstants.FeatureSettings.DEFAULT_PARAMETER_NAMESPACE,
             map[VaultConstants.FeatureSettings.URL] ?: "",
+            map[VaultConstants.FeatureSettings.VAULT_NAMESPACE]
+                    ?: VaultConstants.FeatureSettings.DEFAULT_VAULT_NAMESPACE,
             // Default value to convert from previous config versions
             (map[VaultConstants.FeatureSettings.ENDPOINT] ?: VaultConstants.FeatureSettings.DEFAULT_ENDPOINT_PATH).removePrefix("/"),
             map[VaultConstants.FeatureSettings.ROLE_ID] ?: "",
@@ -36,6 +38,7 @@ data class VaultFeatureSettings(val namespace: String, val url: String, val endp
     fun toMap(map: MutableMap<String, String>) {
         map[VaultConstants.FeatureSettings.URL] = url
         map[VaultConstants.FeatureSettings.NAMESPACE] = namespace
+        map[VaultConstants.FeatureSettings.VAULT_NAMESPACE] = vaultNamespace
         map[VaultConstants.FeatureSettings.ENDPOINT] = getNormalizedEndpoint()
         map[VaultConstants.FeatureSettings.ROLE_ID] = roleId
         map[VaultConstants.FeatureSettings.SECRET_ID] = secretId
@@ -56,6 +59,7 @@ data class VaultFeatureSettings(val namespace: String, val url: String, val endp
         fun getDefaultParameters(): Map<String, String> {
             return mapOf(
                     VaultConstants.FeatureSettings.NAMESPACE to VaultConstants.FeatureSettings.DEFAULT_PARAMETER_NAMESPACE,
+                    VaultConstants.FeatureSettings.VAULT_NAMESPACE to VaultConstants.FeatureSettings.DEFAULT_VAULT_NAMESPACE,
                     VaultConstants.FeatureSettings.AGENT_SUPPORT_REQUIREMENT to VaultConstants.FeatureSettings.AGENT_SUPPORT_REQUIREMENT_VALUE,
                     VaultConstants.FeatureSettings.ENDPOINT to VaultConstants.FeatureSettings.DEFAULT_ENDPOINT_PATH,
                     VaultConstants.FeatureSettings.URL to "http://localhost:8200",
