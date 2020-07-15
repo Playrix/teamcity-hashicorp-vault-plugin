@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 JetBrains s.r.o.
+ * Copyright 2000-2020 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,5 @@ interface VaultDevEnvironment {
         get() = VaultEndpoint.from(URI.create(url))
     val simpleSessionManager: SimpleSessionManager
         get() = SimpleSessionManager { VaultToken.of(token) }
-
-    fun getTemplate(factory: ClientHttpRequestFactory): VaultTemplate =
-            VaultTemplate(endpoint, factory, simpleSessionManager)
 }
 

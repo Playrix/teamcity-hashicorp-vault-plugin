@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 JetBrains s.r.o.
+ * Copyright 2000-2020 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,6 +102,7 @@ class VaultBuildStartContextProcessor(private val connector: VaultConnector) : B
             context.addSharedParameter(getVaultParameterName(settings.namespace, VaultConstants.BACKOFF_PERIOD_PROPERTY_SUFFIX), settings.backoffPeriod.toString())
             context.addSharedParameter(getVaultParameterName(settings.namespace, VaultConstants.WRAPPED_TOKEN_PROPERTY_SUFFIX), wrappedToken)
             context.addSharedParameter(getVaultParameterName(settings.namespace, VaultConstants.URL_PROPERTY_SUFFIX), settings.url)
+            context.addSharedParameter(getVaultParameterName(settings.namespace, VaultConstants.VAULT_NAMESPACE_PROPERTY_SUFFIX), settings.vaultNamespace)
         }
     }
 }

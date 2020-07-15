@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 JetBrains s.r.o.
+ * Copyright 2000-2020 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 package org.jetbrains.teamcity.vault.server
 
 import com.google.common.util.concurrent.Striped
-import com.google.gson.Gson
-import com.google.gson.JsonObject
-import com.google.gson.JsonParseException
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.util.containers.ConcurrentHashSet
 import jetbrains.buildServer.log.Loggers
@@ -30,9 +27,9 @@ import jetbrains.buildServer.util.EventDispatcher
 import jetbrains.buildServer.util.ssl.SSLTrustStoreProvider
 import org.jetbrains.teamcity.vault.*
 import org.jetbrains.teamcity.vault.support.RetryRestTemplate
+import org.jetbrains.teamcity.vault.support.VaultResponses
 import org.jetbrains.teamcity.vault.support.VaultTemplate
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.vault.VaultException
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions
 import org.springframework.vault.client.VaultEndpoint
@@ -140,29 +137,8 @@ class VaultConnector(dispatcher: EventDispatcher<BuildServerListener>, private v
             return login
         }
 
-        private fun getError(e: HttpStatusCodeException): String {
-            val contentType: MediaType?
-            val body = e.responseBodyAsString
-            try {
-                contentType = e.responseHeaders?.contentType
-            } catch(_: Exception) {
-                return body
-            }
-            if (MediaType.APPLICATION_JSON.includes(contentType)) {
-                val json = body
-                try {
-                    val map = Gson().fromJson(json, JsonObject::class.java)
-                    if (map.has("errors")) {
-                        return map.getAsJsonArray("errors").joinToString { it.asString }
-                    }
-                } catch (e: JsonParseException) {
-                }
-            }
-            return body
-        }
-
         private fun getReadableException(cause: HttpStatusCodeException, settings: VaultFeatureSettings): ConnectionException {
-            val err = getError(cause)
+            val err = VaultResponses.getError(cause)
             val prefix = "Cannot log in to HashiCorp Vault using AppRole credentials"
             val message: String
             message = setOf("failed to validate credentials: ", "failed to validate SecretID: ")
@@ -188,7 +164,7 @@ class VaultConnector(dispatcher: EventDispatcher<BuildServerListener>, private v
             val endpoint = VaultEndpoint.from(URI.create(settings.url))!!
             val factory = createClientHttpRequestFactory(trustStoreProvider)
 
-            val template = VaultTemplate(endpoint, factory, DummySessionManager()).withWrappedResponses("10m")
+            val template = VaultTemplate(endpoint, settings.vaultNamespace, factory, DummySessionManager()).withWrappedResponses("10m")
 
             val login = getAppRoleLogin(settings)
 
@@ -222,7 +198,7 @@ class VaultConnector(dispatcher: EventDispatcher<BuildServerListener>, private v
             val endpoint = VaultEndpoint.from(URI.create(settings.url))!!
             val factory = createClientHttpRequestFactory(trustStoreProvider)
 
-            val template = VaultTemplate(endpoint, factory, DummySessionManager())
+            val template = VaultTemplate(endpoint, settings.vaultNamespace, factory, DummySessionManager())
 
             val login = getAppRoleLogin(settings)
 

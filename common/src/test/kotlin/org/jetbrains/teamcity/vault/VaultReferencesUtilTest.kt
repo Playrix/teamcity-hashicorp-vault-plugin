@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 JetBrains s.r.o.
+ * Copyright 2000-2020 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,18 @@ class VaultReferencesUtilTest {
         VaultReferencesUtil.collect(map, refs, namespaces, keys)
         then(keys).containsOnly("c")
         then(refs).containsOnly("vault:/default")
+    }
+
+    @Test
+    fun testReferencesIgnoredInDepParameters() {
+        val namespaces = listOf("")
+        val map = mapOf("a" to "%vault:/test%", "dep.type.a" to "%vault:/test-dep%")
+        then(VaultReferencesUtil.hasReferences(map, namespaces)).isTrue()
+        val keys = HashSet<String>()
+        val refs = HashSet<String>()
+        VaultReferencesUtil.collect(map, refs, namespaces, keys)
+        then(keys).containsOnly(map.keys.first())
+        then(refs).containsOnly("vault:/test")
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 JetBrains s.r.o.
+ * Copyright 2000-2020 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ dependencies {
     }
     compile "org.apache.httpcomponents:httpclient:$httpclient_version"
 
-    testCompile project(path: ':common', configuration: 'testOutput')
+    testImplementation(testFixtures(project(':common')))
     testCompile "org.jetbrains.teamcity:tests-support:$teamcity_version"
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 JetBrains s.r.o.
+ * Copyright 2000-2020 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ object VaultConstants {
 
     val PARAMETER_PREFIX = "teamcity.vault"
     val URL_PROPERTY_SUFFIX = ".url"
+    val VAULT_NAMESPACE_PROPERTY_SUFFIX = ".vault.namespace"
     val WRAPPED_TOKEN_PROPERTY_SUFFIX = ".wrapped.token"
     val TOKEN_REFRESH_TIMEOUT_PROPERTY_SUFFIX = ".token.refresh.timeout"
     val BACKOFF_PERIOD_PROPERTY_SUFFIX = ".backoffPeriod"
@@ -42,6 +43,9 @@ object VaultConstants {
         // Feature settings
         @JvmField val NAMESPACE = "namespace"
         @JvmField val DEFAULT_PARAMETER_NAMESPACE = ""
+
+        @JvmField val VAULT_NAMESPACE = "vault-namespace"
+        @JvmField val DEFAULT_VAULT_NAMESPACE = ""
 
         @JvmField val URL = "url"
 

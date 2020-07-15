@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 JetBrains s.r.o.
+ * Copyright 2000-2020 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ object VaultReferencesUtil {
     @JvmStatic
     fun collect(parameters: Map<String, String>, references: MutableCollection<String>, namespaces: Collection<String>, keys: MutableCollection<String>? = null) {
         for ((key, value) in parameters) {
+            if (key.startsWith("dep.")) continue
             if (!ReferencesResolverUtil.mayContainReference(value)) continue
             val refs = getVaultReferences(value, namespaces)
             if (refs.isNotEmpty()) {
